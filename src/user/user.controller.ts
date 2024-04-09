@@ -16,7 +16,7 @@ export class UserController {
   }
 
   @Delete()
-  deleteUser(@Body() info): Promise<string[]> {
+  async deleteUser(@Body() info): Promise<string[]> {
     return this.userService.deleteUser(info.name);
   }
 
