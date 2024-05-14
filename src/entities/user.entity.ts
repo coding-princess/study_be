@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
 } from 'typeorm';
+import { Rank } from 'src/common/rank.enum';
 
 @Entity()
 export class UserEntity {
@@ -18,6 +19,9 @@ export class UserEntity {
 
   @Column()
   name: string;
+
+  @Column({ type: 'enum', enum: Rank, default: Rank.Bronze })
+  rank: Rank;
 
   @Column({ nullable: true })
   image?: string;

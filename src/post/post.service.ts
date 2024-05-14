@@ -1,61 +1,53 @@
-import { HttpException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { PostEntity } from 'src/entities';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { PostEntity, UserEntity } from 'src/entities';
+import { PostRepository } from 'src/repositories/post.repository';
+import { PostResponseDto } from './dtos/post.response.dto';
+import {
+  AuthorRequestDto,
+  ContentRequestDto,
+  IDRequestDto,
+  LikesRequestDto,
+  PostRequestDto,
+  TitleRequestDto,
+} from './dtos/post.request.dto';
 
 @Injectable()
 export class PostService {
-  constructor(
-    @InjectRepository(PostEntity)
-    private readonly postRepository: Repository<PostEntity>,
-  ) {}
+  constructor(private readonly postRepository: PostRepository) {}
 
-  async getPosts(): Promise<PostEntity[]> {
-    const posts = await this.postRepository.find();
+  async getPosts(): Promise<PostResponseDto[]> {
+    const postsEntity = await this.postRepository.findAll();
+    const posts = postsEntity.map((post) => new PostResponseDto(post));
     return posts;
   }
 
-  async findByTitle(title: string): Promise<PostEntity> {
-    const post = await this.postRepository.findOne({ where: { title } });
-    return post;
+  async findByTitle(body: TitleRequestDto): Promise<PostResponseDto[]> {
+    const postsEntity = await this.postRepository.findByTitle(body.title);
+    const posts = postsEntity.map((post) => new PostResponseDto(post));
+    return posts;
   }
 
-  async addPost(info: PostEntity): Promise<PostEntity | void> {
-    if (!(await this.findByTitle(info.title))) {
-      return await this.postRepository.save(info);
-    } else {
-      throw new HttpException('post already exists', 409);
-    }
+  async findByAuthor(body: AuthorRequestDto): Promise<PostResponseDto[]> {
+    const postsEntity = await this.postRepository.findByAuthor(body.author);
+    const posts = postsEntity.map((post) => new PostResponseDto(post));
+    return posts;
   }
 
-  async deletePost(title: string): Promise<void> {
-    if (await this.findByTitle(title)) {
-      await this.postRepository.delete({ title });
-    } else {
-      throw new HttpException('post not found', 404);
-    }
+  async addPost(body: PostRequestDto): Promise<PostResponseDto> {
+    const newPostEntity = await this.postRepository.create(body);
+    const newPost = new PostResponseDto(newPostEntity);
+    return newPost;
   }
 
-  async updateContent(
-    oldTitle: string,
-    newTitle: string,
-    content: string,
-  ): Promise<void> {
-    if (await this.findByTitle(oldTitle)) {
-      await this.postRepository.update(
-        { title: oldTitle },
-        { title: newTitle, content },
-      );
-    } else {
-      throw new HttpException('post not found', 404);
-    }
+  async deletePost(body: IDRequestDto): Promise<void> {
+    await this.postRepository.deleteByID(body.id);
   }
 
-  async updateLikes(title: string, likes: number): Promise<void> {
-    if (await this.findByTitle(title)) {
-      await this.postRepository.update({ title }, { likes });
-    } else {
-      throw new HttpException('post not found', 404);
-    }
+  async updateContent(body: ContentRequestDto): Promise<void> {
+    await this.postRepository.updateContent(body.id, body.title, body.content);
+  }
+
+  async updateLikes(body: LikesRequestDto): Promise<void> {
+    await this.postRepository.updateLikes(body.id, body.likes);
   }
 }

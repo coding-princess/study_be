@@ -15,6 +15,6 @@ export class PostEntity {
   @Column({ default: 0 })
   likes: number;
 
-  @ManyToOne(() => UserEntity, { onDelete: 'SET NULL' })
-  author: UserEntity;
+  @ManyToOne(() => UserEntity, { onDelete: 'SET NULL', nullable: true })
+  author: UserEntity | null;
 }

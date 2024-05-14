@@ -8,8 +8,13 @@ import {
   UseFilters,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserEntity } from 'src/entities';
 import { HttpExceptionFilter } from 'src/filter/http-exception.filter';
+import { UserResponseDto } from './dtos/user.response.dto';
+import {
+  EmailRequestDto,
+  PasswordRequestDto,
+  UserRequestDto,
+} from './dtos/user.request.dto';
 
 @Controller('user')
 @UseFilters(HttpExceptionFilter)
@@ -17,27 +22,27 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getUsers(): Promise<UserEntity[]> {
+  async getUsers(): Promise<UserResponseDto[]> {
     return this.userService.getUsers();
   }
 
   @Post()
-  async addUser(@Body() info) {
-    return this.userService.addUser(info);
+  async addUser(@Body() body: UserRequestDto): Promise<UserResponseDto> {
+    return this.userService.addUser(body);
   }
 
   @Delete()
-  deleteUser(@Body() info) {
-    return this.userService.deleteUser(info.email);
+  deleteUser(@Body() body: EmailRequestDto): Promise<void> {
+    return this.userService.deleteUser(body);
   }
 
   @Get('/find')
-  async findByEmail(@Body() info) {
-    return this.userService.findByEmail(info.email);
+  async findByEmail(@Body() body: EmailRequestDto): Promise<UserResponseDto> {
+    return this.userService.findByEmail(body);
   }
 
   @Put('/password')
-  updatePassword(@Body() info) {
-    return this.userService.updatePassword(info.email, info.password);
+  updatePassword(@Body() body: PasswordRequestDto): Promise<void> {
+    return this.userService.updatePassword(body);
   }
 }
