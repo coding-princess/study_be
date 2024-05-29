@@ -21,6 +21,13 @@ export class UserRepository {
     return user;
   }
 
+  async findByVal(key: keyof UserEntity, val: any): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { [key]: val },
+    });
+    return user;
+  }
+
   async existsByEmail(email: string): Promise<boolean> {
     const user = await this.userRepository.exists({ where: { email } });
     return user;
@@ -46,6 +53,14 @@ export class UserRepository {
   async updatePassword(email: string, password: string): Promise<void> {
     if (await this.existsByEmail(email)) {
       await this.userRepository.update({ email }, { password });
+    } else {
+      throw new HttpException('user not found', 404);
+    }
+  }
+
+  async updateToken(email: string, token: string): Promise<void> {
+    if (await this.existsByEmail(email)) {
+      await this.userRepository.update({ email }, { token });
     } else {
       throw new HttpException('user not found', 404);
     }

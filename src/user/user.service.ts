@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from 'src/repositories/user.repository';
 import { UserResponseDto } from './dtos/user.response.dto';
+import { UserEntity } from 'src/entities';
 import {
   EmailRequestDto,
   PasswordRequestDto,
@@ -17,10 +18,15 @@ export class UserService {
     return users;
   }
 
-  async findByEmail(body: EmailRequestDto): Promise<UserResponseDto> {
-    const userEntity = await this.userRepository.findByEmail(body.email);
+  async findByVal(key: keyof UserEntity, val: any): Promise<UserResponseDto> {
+    const userEntity = await this.userRepository.findByVal(key, val);
     const user = new UserResponseDto(userEntity);
     return user;
+  }
+
+  async findByEmail(email: string): Promise<UserEntity> {
+    const userEntity = await this.userRepository.findByEmail(email);
+    return userEntity;
   }
 
   async addUser(body: UserRequestDto): Promise<UserResponseDto> {
@@ -36,6 +42,8 @@ export class UserService {
   async updatePassword(body: PasswordRequestDto): Promise<void> {
     await this.userRepository.updatePassword(body.email, body.password);
   }
-}
 
-//TypeORM없이 로직만 작성
+  async updateToken(email: string, token: string): Promise<void> {
+    await this.userRepository.updateToken(email, token);
+  }
+}

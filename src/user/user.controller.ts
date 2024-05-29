@@ -6,6 +6,8 @@ import {
   Delete,
   Put,
   UseFilters,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { HttpExceptionFilter } from 'src/filter/http-exception.filter';
@@ -15,6 +17,9 @@ import {
   PasswordRequestDto,
   UserRequestDto,
 } from './dtos/user.request.dto';
+import { AccessGuard } from 'src/auth/guard/jwt-access.guard';
+import { Request } from 'express';
+import { JwtPayload } from 'src/interfaces/jwt.payload';
 
 @Controller('user')
 @UseFilters(HttpExceptionFilter)
@@ -22,8 +27,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getUsers(): Promise<UserResponseDto[]> {
-    return this.userService.getUsers();
+  @UseGuards(AccessGuard)
+  async getUsers(@Req() req: Request): Promise<UserResponseDto> {
+    const { id } = req.user as JwtPayload;
+    return this.userService.findByVal('id', id);
   }
 
   @Post()
@@ -38,7 +45,7 @@ export class UserController {
 
   @Get('/find')
   async findByEmail(@Body() body: EmailRequestDto): Promise<UserResponseDto> {
-    return this.userService.findByEmail(body);
+    return this.userService.findByEmail(body.email);
   }
 
   @Put('/password')

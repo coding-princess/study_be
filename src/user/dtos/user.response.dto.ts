@@ -29,11 +29,16 @@ export class UserResponseDto {
   @IsDate()
   createdAt: Date;
 
+  @IsOptional()
+  @IsString()
+  token?: string;
+
   constructor(userEntity: UserEntity) {
     this.email = userEntity.email;
     this.name = userEntity.name;
     this.rank = userEntity.rank;
     this.image = userEntity.image;
     this.createdAt = userEntity.createdAt;
+    this.token = userEntity.token;
   }
 }
